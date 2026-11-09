@@ -1,0 +1,80 @@
+.viewport {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/*
+ * 16 px fade at both ends, drawn as two static overlays in the bar color. A mask-image on
+ * the viewport made the compositor re-blend the moving layer on every frame (NFR-1).
+ */
+.viewport::before,
+.viewport::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  pointer-events: none;
+}
+
+.viewport::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--surface-0), transparent);
+}
+
+.viewport::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--surface-0), transparent);
+}
+
+.track {
+  display: flex;
+  flex: none;
+  align-items: center;
+  will-change: transform;
+}
+
+.animate {
+  animation-name: marquee;
+  /* Linear on every display frame (A19/D20): no steps(), no frame-rate cap. */
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.viewport:hover .animate,
+.paused {
+  animation-play-state: paused;
+}
+
+.copy {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+  padding-right: var(--space-1);
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-4);
+  color: var(--text-2);
+  font: 500 12px/16px var(--font-sans);
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}

@@ -1,0 +1,191 @@
+.root {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* macOS search field with the market pop-up inside it, on the right. */
+.field {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 var(--space-1) 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface-1);
+}
+
+.field:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.searchIcon {
+  flex: none;
+  color: var(--text-2);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  outline: none;
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+/* WebKit's own clear button is not a Solar icon; the field has its own (.clear). */
+.input::-webkit-search-cancel-button {
+  appearance: none;
+  display: none;
+}
+
+/* Icon-only clear button (Solar Close Circle, label in aria-label + title). */
+.clear {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: var(--space-1);
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-2);
+}
+
+.clear:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.clear:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+}
+
+.fieldDivider {
+  flex: none;
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+}
+
+.marketWrap {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+
+.market {
+  appearance: none;
+  height: 24px;
+  padding: 0 22px 0 var(--space-2);
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-1);
+  font-weight: 500;
+}
+
+.market:hover {
+  background: var(--surface-2);
+}
+
+.market:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+}
+
+.marketChevron {
+  position: absolute;
+  right: 6px;
+  color: var(--text-2);
+  pointer-events: none;
+}
+
+.results {
+  max-height: 180px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface-1);
+}
+
+.list {
+  margin: 0;
+  padding: var(--space-1);
+  list-style: none;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 32px;
+  padding: 0 var(--space-2);
+  border-radius: 6px;
+}
+
+.result:hover {
+  background: var(--surface-2);
+}
+
+.symbol {
+  flex: none;
+  min-width: 72px;
+  font-weight: 700;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.badge {
+  flex: none;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font: 600 11px/18px var(--font-sans);
+}
+
+.add {
+  flex: none;
+  height: 22px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--surface-0-base);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status {
+  flex: none;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.note {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  color: var(--text-2);
+}

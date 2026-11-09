@@ -1,0 +1,43 @@
+.price {
+  font: 700 13px/18px var(--font-sans);
+  /* After the shorthand, which resets it (NFR-5). */
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+}
+
+.ref {
+  color: var(--ref);
+}
+.ceiling {
+  color: var(--ceiling);
+}
+.floor {
+  color: var(--floor);
+}
+/* The up/down flash follows the tones, so it wins while it lasts. */
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .up,
+  .down {
+    color: var(--text-1);
+  }
+  .ref.up,
+  .ref.down {
+    color: var(--ref);
+  }
+  .ceiling.up,
+  .ceiling.down {
+    color: var(--ceiling);
+  }
+  .floor.up,
+  .floor.down {
+    color: var(--floor);
+  }
+}

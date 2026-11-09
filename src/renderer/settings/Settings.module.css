@@ -1,0 +1,182 @@
+/*
+ * macOS-style Settings window: unified toolbar with icon tabs, a source-list sidebar and
+ * grouped (inset) sections. The window background is the bar's own surface
+ * (--surface-0-base), so the bar and Settings share one look in both themes.
+ */
+:global(html),
+:global(body),
+:global(#root) {
+  margin: 0;
+  height: 100%;
+}
+
+:global(body) {
+  /* Native controls and text selection use the app green, not the macOS accent color. */
+  accent-color: var(--accent);
+  background: var(--surface-0-base);
+  color: var(--text-1);
+  font: 400 13px/18px var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+}
+
+:global(button),
+:global(input),
+:global(select) {
+  font: inherit;
+  color: inherit;
+}
+
+:global(input) {
+  user-select: text;
+}
+
+:global(::selection) {
+  background: var(--selection);
+  color: var(--text-1);
+}
+
+:global(:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Toolbar: 56 px; on macOS it is the title bar (traffic lights at x 18, settingsWindow.ts). */
+.toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+}
+
+.app[data-platform='darwin'] .toolbar {
+  -webkit-app-region: drag;
+}
+
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+  -webkit-app-region: no-drag;
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 76px;
+  height: 48px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-m);
+  background: none;
+  color: var(--text-2);
+  font: 500 11px/14px var(--font-sans);
+  cursor: default;
+}
+
+.tab:hover {
+  color: var(--text-1);
+}
+
+.tab[aria-selected='true'] {
+  background: var(--surface-2);
+  color: var(--accent);
+}
+
+.tab[aria-selected='true'] span {
+  color: var(--text-1);
+}
+
+.error {
+  flex: none;
+  margin: var(--space-3) var(--space-4) 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-m);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--down);
+  color: var(--text-1);
+}
+
+.panes {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+}
+
+/* Source-list sidebar. */
+.left {
+  min-height: 0;
+  overflow: auto;
+  border-right: 1px solid var(--border);
+  background: var(--surface-1);
+  padding: var(--space-3) var(--space-2);
+}
+
+.right {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 28px;
+}
+
+.listTitle {
+  margin: 0;
+  font: 700 15px/20px var(--font-sans);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activeBadge {
+  flex: none;
+  padding: 0 var(--space-2);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font: 600 11px/20px var(--font-sans);
+}
+
+/* macOS push button, accent (default) style. */
+.primary {
+  flex: none;
+  height: 24px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--surface-0-base);
+  font-weight: 600;
+}
+
+.primary:hover {
+  filter: brightness(1.08);
+}
+
+.prefs {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-5) var(--space-6);
+}

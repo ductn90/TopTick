@@ -1,0 +1,105 @@
+:global(html),
+:global(body),
+:global(#root) {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+:global(body) {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+}
+
+.bar {
+  position: relative;
+  box-sizing: border-box;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-1) 0 var(--space-2);
+  background: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-bar);
+  color: var(--text-1);
+  overflow: hidden;
+  /* Moving is done in JS (pointer gesture -> main), so no native drag region anywhere. */
+  -webkit-app-region: no-drag;
+}
+
+/* Unlocked: the whole bar is a drag surface. */
+.movable {
+  cursor: grab;
+}
+
+.move,
+.move * {
+  cursor: grabbing !important;
+}
+
+.resizeLeft,
+.resizeLeft *,
+.resizeRight,
+.resizeRight * {
+  cursor: ew-resize !important;
+}
+
+/* Edge resize handles (custom: native edge resize is off, see barWindow.ts). */
+.resizeHandle {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.left {
+  left: 0;
+}
+
+.right {
+  right: 0;
+}
+
+.pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 24px;
+  max-width: 128px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text-1);
+  font: 600 11px/24px var(--font-sans);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pill:hover {
+  background: var(--surface-3);
+}
+
+.pill:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.pillName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  flex: none;
+  color: var(--text-2);
+}

@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noEmit": true
+  },
+  "include": [
+    "src/main/**/*",
+    "src/preload/**/*",
+    "src/shared/**/*",
+    "scripts/**/*.ts",
+    "src/renderer/bar/geometry.ts",
+    "tests/**/*.ts",
+    "electron.vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts"
+  ],
+  "exclude": ["tests/e2e/**"]
+}

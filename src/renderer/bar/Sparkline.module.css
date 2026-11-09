@@ -1,0 +1,44 @@
+.spark {
+  flex: none;
+  display: block;
+  overflow: visible;
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+.flat {
+  color: var(--flat);
+}
+
+.area {
+  fill: currentColor;
+  fill-opacity: var(--spark-fill-alpha);
+  stroke: none;
+}
+
+.line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.ref {
+  stroke: var(--text-3);
+  stroke-width: 1px;
+  stroke-dasharray: 2 2;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Static last-point dot: the former 400 ms scale pulse repainted the moving track every frame (NFR-1). */
+.dot {
+  fill: currentColor;
+}

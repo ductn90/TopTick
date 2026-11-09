@@ -1,0 +1,157 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.row {
+  border-radius: 6px;
+}
+
+.selected {
+  background: var(--surface-3);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-right: var(--space-1);
+}
+
+.select {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  text-align: left;
+}
+
+.row:not(.selected) .select:hover {
+  background: var(--surface-2);
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.selected .name {
+  font-weight: 600;
+}
+
+.dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.actions {
+  flex: none;
+  display: flex;
+  gap: 2px;
+}
+
+/* Icon-only button (Solar Linear icon, label in aria-label + title). */
+.iconButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-2);
+}
+
+.iconButton:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text-1);
+}
+
+.dangerIcon:hover:not(:disabled) {
+  color: var(--down);
+}
+
+.iconButton:disabled {
+  color: var(--text-3);
+  opacity: 0.6;
+}
+
+.inline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2);
+}
+
+.inline .actions {
+  gap: var(--space-1);
+}
+
+.confirm {
+  color: var(--text-1);
+}
+
+.input {
+  box-sizing: border-box;
+  height: 24px;
+  min-width: 0;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-0-base);
+}
+
+.create {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-1);
+}
+
+.create .input {
+  flex: 1;
+}
+
+/* macOS bordered push button. */
+.small {
+  height: 22px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-0-base);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.small:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.danger {
+  color: var(--down);
+}

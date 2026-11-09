@@ -1,0 +1,156 @@
+{
+ "timezone": "UTC",
+ "serverTime": 1793928591996,
+ "symbols": [
+  {
+   "symbol": "BTCUSDT",
+   "status": "TRADING",
+   "baseAsset": "BTC",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "ETHUSDT",
+   "status": "TRADING",
+   "baseAsset": "ETH",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "BNBUSDT",
+   "status": "TRADING",
+   "baseAsset": "BNB",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "NEOUSDT",
+   "status": "TRADING",
+   "baseAsset": "NEO",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "LTCUSDT",
+   "status": "TRADING",
+   "baseAsset": "LTC",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "QTUMUSDT",
+   "status": "TRADING",
+   "baseAsset": "QTUM",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "ADAUSDT",
+   "status": "TRADING",
+   "baseAsset": "ADA",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "XRPUSDT",
+   "status": "TRADING",
+   "baseAsset": "XRP",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "TUSDUSDT",
+   "status": "TRADING",
+   "baseAsset": "TUSD",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "IOTAUSDT",
+   "status": "TRADING",
+   "baseAsset": "IOTA",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "XLMUSDT",
+   "status": "TRADING",
+   "baseAsset": "XLM",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "ONTUSDT",
+   "status": "TRADING",
+   "baseAsset": "ONT",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "TRXUSDT",
+   "status": "TRADING",
+   "baseAsset": "TRX",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "ETCUSDT",
+   "status": "TRADING",
+   "baseAsset": "ETC",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "VETUSDT",
+   "status": "TRADING",
+   "baseAsset": "VET",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "USDCUSDT",
+   "status": "TRADING",
+   "baseAsset": "USDC",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "LINKUSDT",
+   "status": "TRADING",
+   "baseAsset": "LINK",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "ONGUSDT",
+   "status": "TRADING",
+   "baseAsset": "ONG",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "HOTUSDT",
+   "status": "TRADING",
+   "baseAsset": "HOT",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "ZILUSDT",
+   "status": "TRADING",
+   "baseAsset": "ZIL",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "ETHBTC",
+   "status": "TRADING",
+   "baseAsset": "ETH",
+   "quoteAsset": "BTC"
+  },
+  {
+   "symbol": "LTCBTC",
+   "status": "TRADING",
+   "baseAsset": "LTC",
+   "quoteAsset": "BTC"
+  },
+  {
+   "symbol": "BNBBTC",
+   "status": "TRADING",
+   "baseAsset": "BNB",
+   "quoteAsset": "BTC"
+  },
+  {
+   "symbol": "BCCUSDT",
+   "status": "BREAK",
+   "baseAsset": "BCC",
+   "quoteAsset": "USDT"
+  },
+  {
+   "symbol": "EOSUSDT",
+   "status": "BREAK",
+   "baseAsset": "EOS",
+   "quoteAsset": "USDT"
+  }
+ ]
+}
