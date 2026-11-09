@@ -38,7 +38,7 @@ All screenshots use made-up data in an example "TopTick" watchlist, so that one 
 
 ## Install
 
-Download the files for your system from the repository's **Releases** page, or build the app yourself (see [Development](#development)). The builds are not signed.
+Download the files for your system from the repository's **[Releases](https://github.com/ductn90/TopTick/releases)** page, or build the app yourself (see [Development](#development)). The builds are not signed.
 
 - **macOS:** open `TopTick-<version>-mac-arm64.dmg` (Apple silicon) or `TopTick-<version>-mac-x64.dmg` (Intel) and drag TopTick to Applications. A build you made yourself opens directly: macOS only adds the quarantine flag to files that were downloaded or received, so Gatekeeper does not check it.
   A copy you downloaded or got from another Mac is quarantined, and macOS blocks it because it is not signed or notarized. Since macOS 15, right-click → **Open** no longer gets past this. Try to open the app once, then go to **System Settings → Privacy & Security**, scroll to **Security**, click **Open Anyway** and confirm ([Apple's instructions](https://support.apple.com/en-us/102445)). If macOS says the app is damaged, remove the quarantine flag instead:
