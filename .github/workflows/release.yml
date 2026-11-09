@@ -24,14 +24,21 @@ jobs:
           - os: macos-latest
             dist: mac
             label: macOS
+            # Default @electron/get cache (env-paths), used by electron's postinstall and by
+            # electron-builder. Neither reads an ELECTRON_CACHE variable.
+            electron-cache: ~/Library/Caches/electron
           # x64 NSIS installer.
           - os: windows-latest
             dist: win
             label: Windows
+            electron-cache: ~/AppData/Local/electron/Cache
     runs-on: ${{ matrix.os }}
     env:
       # Unsigned builds: stop electron-builder from looking for a signing identity.
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      # electron-builder's tool downloads (dmgbuild, 7zip, NSIS). Outside the packaged files
+      # (electron-builder.yml packs only out/** and package.json).
+      ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -40,6 +47,16 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      # Electron and electron-builder downloads come from GitHub releases, which can time out
+      # (HTTP 504). Restored before npm ci (electron's postinstall downloads Electron) and before
+      # the version step changes package-lock.json on tag builds, so tag and main share the key.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ matrix.electron-cache }}
+            ${{ env.ELECTRON_BUILDER_CACHE }}
+          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: electron-${{ runner.os }}-
       - run: npm ci
       - name: Set the version
         id: version
@@ -63,8 +80,30 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - name: Package
-        # The release job publishes; electron-builder must not.
-        run: npm run dist:${{ matrix.dist }} -- --publish never
+        shell: bash
+        env:
+          DIST: ${{ matrix.dist }}
+        # The release job publishes; electron-builder must not. Up to 3 attempts, 30 s and 90 s
+        # apart, for transient download failures; release/ is cleared before each retry.
+        run: |
+          delays=(30 90)
+          attempt=1
+          while true; do
+            if npm run "dist:$DIST" -- --publish never; then
+              exit 0
+            else
+              status=$?
+            fi
+            if [ "$attempt" -ge 3 ]; then
+              echo "::error::Packaging failed after $attempt attempts (exit $status)"
+              exit "$status"
+            fi
+            delay="${delays[attempt - 1]}"
+            echo "::warning::Packaging attempt $attempt failed (exit $status); retrying in ${delay}s"
+            rm -rf release
+            sleep "$delay"
+            attempt=$((attempt + 1))
+          done
       - name: Check the installers
         shell: bash
         env:
