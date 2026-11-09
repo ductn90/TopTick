@@ -25,15 +25,23 @@ export async function removeDir(dir: string): Promise<void> {
   await fs.rm(dir, { recursive: true, force: true })
 }
 
-/** Launches the built app (`out/`) with an isolated userData dir; fake data unless `fake: false`. */
-export async function launch(userDataDir: string, opts: { fake?: boolean } = {}): Promise<Launched> {
+/**
+ * Launches the built app (`out/`) with an isolated userData dir; fake data unless `fake: false`.
+ * `fixtures: true` runs the real providers against recorded real payloads (fixtureFetch.cjs).
+ */
+export async function launch(
+  userDataDir: string,
+  opts: { fake?: boolean; fixtures?: boolean; env?: Record<string, string> } = {}
+): Promise<Launched> {
   const env: Record<string, string> = {}
   for (const [k, v] of Object.entries(process.env)) if (v !== undefined) env[k] = v
   delete env.ELECTRON_RENDERER_URL
   delete env.TOPTICK_FAKE_DATA
-  if (opts.fake !== false) env.TOPTICK_FAKE_DATA = '1'
+  if (opts.fake !== false && !opts.fixtures) env.TOPTICK_FAKE_DATA = '1'
   env.TOPTICK_USER_DATA_DIR = userDataDir
-  const app = await electron.launch({ args: ['.'], cwd: ROOT, env })
+  Object.assign(env, opts.env)
+  const args = opts.fixtures ? ['-r', join(__dirname, 'fixtureFetch.cjs'), '.'] : ['.']
+  const app = await electron.launch({ args, cwd: ROOT, env })
   const bar = await app.firstWindow()
   await bar.waitForSelector('[data-testid="bar"]')
   return { app, bar }

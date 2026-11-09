@@ -1,8 +1,11 @@
 import fs from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { parseCafefBoard } from '../../src/main/market/providers/cafef'
+import { parseVietcapQuotes } from '../../src/main/market/providers/vietcap'
 import { itemTone, type PriceTone } from '../../src/shared/priceTone'
 import type { Market, Quote } from '../../src/shared/types'
+import { fixture, ict } from './helpers'
 
 const BAR = join(__dirname, '../../src/renderer/bar')
 
@@ -66,8 +69,8 @@ describe('sparkline color = price tone', () => {
     expect(SPARK[tone]).toBe(TOKEN[tone])
     // Same color as the glyph and % change of the item...
     expect(SPARK[tone]).toBe(ITEM[tone])
-    // ...and as the price itself where the price is tinted (VN ref/ceiling/floor).
-    if (tone === 'ref' || tone === 'ceiling' || tone === 'floor') expect(SPARK[tone]).toBe(PRICE[tone])
+    // ...and as the price number itself, in every tone.
+    expect(SPARK[tone]).toBe(PRICE[tone])
   })
 
   it('the dashed reference line stays neutral', () => {
@@ -78,5 +81,26 @@ describe('sparkline color = price tone', () => {
   it('has no color transition or animation (a tone change is an instant switch)', () => {
     const css = fs.readFileSync(join(BAR, 'Sparkline.module.css'), 'utf8')
     expect(css).not.toMatch(/transition|animation|@keyframes/)
+  })
+})
+
+// REAL DATA: Vietcap getList and the CafeF HOSE board recorded 2026-11-09 10:30 ICT. SMA was at
+// its ceiling (9,800), CMV at its floor (7,890), VCI (19,950 / 20,000) and VNG (5,060) down.
+describe('real provider payloads: one tone for price and sparkline', () => {
+  const now = ict(2026, 11, 9, 10, 30)
+  const expected: Record<string, PriceTone> = { 'vn:SMA': 'ceiling', 'vn:CMV': 'floor', 'vn:VCI': 'down', 'vn:VNG': 'down' }
+  const sources: [string, Quote[]][] = [
+    ['Vietcap', parseVietcapQuotes(fixture('vietcap/getList-limits.json'), now)!],
+    ['CafeF', parseCafefBoard(fixture('cafef/board-center1-limits.json'), new Set(['SMA', 'CMV', 'VCI', 'VNG']), now)!]
+  ]
+  it.each(sources)('%s', (_source, quotes) => {
+    expect(quotes.map((q) => q.id).sort()).toEqual(Object.keys(expected).sort())
+    for (const q of quotes) {
+      const tone = itemTone(q, 'vn')
+      expect(tone, q.id).toBe(expected[q.id])
+      expect(SPARK[tone], q.id).toBe(TOKEN[tone])
+      expect(PRICE[tone], q.id).toBe(SPARK[tone])
+      expect(ITEM[tone], q.id).toBe(SPARK[tone])
+    }
   })
 })

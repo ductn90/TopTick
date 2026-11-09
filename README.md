@@ -9,7 +9,7 @@ TopTick is a small desktop bar that scrolls live prices for Vietnamese stocks an
 - Always on top: the bar floats above your other windows.
 - Each item shows a ▲/▼ glyph, the symbol and name, a sparkline with a dashed reference line, the last price and the percent change.
 - Vietnamese stocks use the local board colors: yellow at the reference price, purple at the ceiling, cyan at the floor.
-- The sparkline uses the same color as the item's price and percent change.
+- One color per item for the glyph, the price, the percent change and the sparkline: green when up, red when down, plus the Vietnamese board colors above. A price that just changed flashes briefly on a green or red background.
 - More items than fit on the bar scroll sideways in a loop. Hovering pauses the scroll.
 - Watchlists: add, reorder, hide and show symbols, and switch lists from the bar.
 - Drag the bar to move it and drag its left or right edge to change its width. **Lock position** turns both off.

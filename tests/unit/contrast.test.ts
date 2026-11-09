@@ -74,6 +74,9 @@ describe.each(['dark', 'light'] as const)('green accent (Settings), %s theme', (
     expect(contrast(t['--knob']!, ring)).toBeGreaterThanOrEqual(3)
     if (ring !== t['--accent']) expect(contrast(ring, t['--accent']!)).toBeGreaterThanOrEqual(3)
   })
+  it.each(['--up', '--down'])('the price flash chip text (--surface-0-base) on %s >= 4.5:1', (chip) => {
+    expect(contrast(t['--surface-0-base']!, t[chip]!)).toBeGreaterThanOrEqual(4.5)
+  })
   it('selected text on the selection highlight >= 4.5:1', () => {
     expect(contrast(t['--text-1']!, t['--selection']!)).toBeGreaterThanOrEqual(4.5)
   })

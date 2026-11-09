@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import type { PriceTone } from '../../shared/priceTone'
 import styles from './PriceText.module.css'
 
-/** Tones that color the price itself; up/down/flat prices stay in the text color. */
-const PRICE_TONES = new Set<PriceTone>(['ref', 'ceiling', 'floor'])
+const FLASH_CLASS = { up: styles.flashUp, down: styles.flashDown } as const
 
 /**
- * The changed price switches to the up/down color for TINT_MS, then back. No color
- * transition: a fade repaints the scrolling track on every frame (NFR-1); two paints suffice.
+ * The price takes the item's tone color. A changed price shows on an up/down chip for TINT_MS,
+ * then back. No transition: a fade repaints the scrolling track on every frame (NFR-1); two
+ * paints suffice.
  */
 const TINT_MS = 600
 
@@ -26,8 +26,7 @@ export function PriceText({ price, text, tone }: { price: number; text: string; 
     return () => clearTimeout(id)
   }, [price])
 
-  const base = tone && PRICE_TONES.has(tone) ? styles[tone] : undefined
-  const className = [styles.price, base, flash && styles[flash], 'num'].filter(Boolean).join(' ')
+  const className = [styles.price, tone && styles[tone], flash && FLASH_CLASS[flash], 'num'].filter(Boolean).join(' ')
   return (
     <span className={className} data-testid="price" data-flash={flash ?? undefined}>
       {text}

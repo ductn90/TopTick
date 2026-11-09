@@ -5,16 +5,7 @@
   color: var(--text-1);
 }
 
-.ref {
-  color: var(--ref);
-}
-.ceiling {
-  color: var(--ceiling);
-}
-.floor {
-  color: var(--floor);
-}
-/* The up/down flash follows the tones, so it wins while it lasts. */
+/* The item's tone: the same color as the glyph, % change and sparkline (TickerItem, Sparkline). */
 .up {
   color: var(--up);
 }
@@ -23,21 +14,42 @@
   color: var(--down);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .up,
-  .down {
-    color: var(--text-1);
+.flat {
+  color: var(--flat);
+}
+
+/* VN: at the reference price, the ceiling and the floor. */
+.ref {
+  color: var(--ref);
+}
+
+.ceiling {
+  color: var(--ceiling);
+}
+
+.floor {
+  color: var(--floor);
+}
+
+/*
+ * The tick flash: the price is already in its tone color, so a changed price shows on a solid
+ * up/down chip for TINT_MS instead. The horizontal shadows widen the chip without moving the
+ * layout. Not shown with reduced motion.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .flashUp,
+  .flashDown {
+    color: var(--surface-0-base);
+    border-radius: var(--radius-s);
   }
-  .ref.up,
-  .ref.down {
-    color: var(--ref);
+
+  .flashUp {
+    background: var(--up);
+    box-shadow: -3px 0 0 var(--up), 3px 0 0 var(--up);
   }
-  .ceiling.up,
-  .ceiling.down {
-    color: var(--ceiling);
-  }
-  .floor.up,
-  .floor.down {
-    color: var(--floor);
+
+  .flashDown {
+    background: var(--down);
+    box-shadow: -3px 0 0 var(--down), 3px 0 0 var(--down);
   }
 }

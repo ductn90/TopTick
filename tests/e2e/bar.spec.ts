@@ -359,7 +359,7 @@ test('each item is a separate tile without divider lines; the marquee moves on e
   expect(frames).toBeGreaterThan(40)
   expect(moves / frames).toBeGreaterThan(0.9)
 })
-test('sparkline line, area and dot use the price tone color in both themes (fake quotes)', async () => {
+test('price, sparkline line, area and dot use the item tone color in both themes (fake quotes)', async () => {
   const { app, bar } = ctx
   // FAKE DATA: [id, ref, price, ceiling, floor] -> expected tone.
   const rows = [
@@ -415,8 +415,8 @@ test('sparkline line, area and dot use the price tone color in both themes (fake
       expect(c.area).toBe(c.line)
       expect(c.dot).toBe(c.line)
       expect(Number(c.areaOpacity)).toBeLessThanOrEqual(0.12)
-      // The price number is tinted only at VN ref/ceiling/floor; there it matches the chart too.
-      if (row.tone === 'ref' || row.tone === 'ceiling' || row.tone === 'floor') expect(c.price).toBe(c.line)
+      // The price number takes the same tone color in every tone.
+      expect(c.price).toBe(c.line)
       // The dashed reference line keeps its neutral color.
       expect(c.refLine).toBe(c.text3)
     }
