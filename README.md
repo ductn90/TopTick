@@ -2,7 +2,7 @@
 
 TopTick is a small desktop bar that scrolls live prices for Vietnamese stocks and indices, US stocks and indices, and crypto. The bar stays on top of other windows, so you can follow prices and indices while you work in other apps, without switching back to a price board in the browser.
 
-![TopTick bar in the dark theme](docs/screenshots/bar-dark.png)
+![TopTick bar in the dark theme](docs/screenshots/toptickvideo.gif)
 
 ## Features
 
@@ -18,6 +18,8 @@ TopTick is a small desktop bar that scrolls live prices for Vietnamese stocks an
 - Tray / menu-bar icon with pause, lock, click-through and Settings.
 
 ## Screenshots
+
+![TopTick bar in the dark theme](docs/screenshots/bar-dark.png)
 
 ![TopTick bar in the light theme](docs/screenshots/bar-light.png)
 
