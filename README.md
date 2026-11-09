@@ -25,7 +25,7 @@ TopTick is a small desktop bar that scrolls live prices for Vietnamese stocks an
 |---|---|
 | ![Settings window, Watchlists tab, dark theme](docs/screenshots/settings-watchlists-dark.png) | ![Settings window, Preferences tab, light theme](docs/screenshots/settings-preferences-light.png) |
 
-The two bar screenshots use made-up data, so that one bar shows the ceiling, reference, floor, up and down colors. The Settings screenshots show real data, captured after the US and Vietnamese markets had closed.
+All screenshots use made-up data in an example "TopTick" watchlist, so that one bar shows the ceiling, reference, floor, up and down colors.
 
 ## Platforms
 

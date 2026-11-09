@@ -44,10 +44,28 @@ describe('tokens.css', () => {
   })
 })
 
+/**
+ * User decision 2026-11-09 (design.md D29): in the light theme the floor and reference tones use
+ * the user's exact colors, which are below 4.5:1. The asserted floor is the measured ratio, so a
+ * darker background or a lighter color still fails.
+ */
+const USER_EXCEPTIONS: Record<string, { hex: string; min: Record<(typeof BACKGROUNDS)[number], number> }> = {
+  'light --floor': { hex: '#5AC8FA', min: { '--surface-0-base': 1.89, '--surface-1': 1.76 } },
+  'light --ref': { hex: '#FFA800', min: { '--surface-0-base': 1.93, '--surface-1': 1.8 } }
+}
+
 describe.each(['dark', 'light'] as const)('NFR-6 contrast, %s theme', (theme) => {
   const tokens = themeTokens(theme)
   for (const bg of BACKGROUNDS) {
     for (const fg of FOREGROUNDS) {
+      const exception = USER_EXCEPTIONS[`${theme} ${fg}`]
+      if (exception) {
+        it(`${fg} on ${bg} >= ${exception.min[bg]}:1 (user-decided exception to 4.5:1)`, () => {
+          expect(tokens[fg]).toBe(exception.hex)
+          expect(contrast(tokens[fg]!, tokens[bg]!)).toBeGreaterThanOrEqual(exception.min[bg])
+        })
+        continue
+      }
       it(`${fg} on ${bg} >= 4.5:1`, () => {
         expect(contrast(tokens[fg]!, tokens[bg]!)).toBeGreaterThanOrEqual(4.5)
       })
@@ -98,7 +116,11 @@ describe('measured ratios match the design table', () => {
     ['light', '--up', '--surface-0-base', 5.4],
     ['light', '--down', '--surface-0-base', 5.21],
     ['light', '--down', '--surface-1', 4.86],
-    ['light', '--flat', '--surface-1', 5.04]
+    ['light', '--flat', '--surface-1', 5.04],
+    ['light', '--floor', '--surface-0-base', 1.9],
+    ['light', '--floor', '--surface-1', 1.77],
+    ['light', '--ref', '--surface-0-base', 1.93],
+    ['light', '--ref', '--surface-1', 1.81]
   ] as const)('%s %s on %s = %s', (theme, fg, bg, expected) => {
     const t = themeTokens(theme)
     expect(contrast(t[fg]!, t[bg]!)).toBeCloseTo(expected, 1)
