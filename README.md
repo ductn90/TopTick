@@ -74,16 +74,16 @@ Example: `TOPTICK_FAKE_DATA=1 npm run dev`. In PowerShell: `$env:TOPTICK_FAKE_DA
 
 ## Releases
 
-GitHub Actions (`.github/workflows/release.yml`) type-checks, runs the unit tests and builds the packages on every push to `main` and every pull request. Pushing a version tag also publishes a GitHub Release with the macOS arm64 and x64 `.dmg` and `.zip` files and the Windows x64 installer attached.
+GitHub Actions (`.github/workflows/release.yml`) type-checks, runs the unit tests and builds the macOS arm64 and x64 `.dmg` and `.zip` files and the Windows x64 installer on every push to `main`, every pull request and every manual **Run workflow**. Those runs only keep the files as artifacts you can download from the run page for 30 days; they do not create a Release.
 
-To cut a release, set `version` in `package.json`, commit and push, then tag that commit with the same version and push the tag:
+To release, create a tag `vX.Y.Z` and push it. There is no need to edit `package.json`: the workflow takes the version from the tag and attaches the files to the GitHub Release for that tag, creating the Release if it does not exist yet.
 
 ```sh
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.3
+git push origin v0.1.3
 ```
 
-The workflow stops if the tag does not match `package.json`. The builds are unsigned, so macOS and Windows warn on first launch (see [Install](#install)).
+The builds are unsigned, so macOS and Windows warn on first launch (see [Install](#install)).
 
 ## Data sources
 
