@@ -42,7 +42,7 @@ Download the files for your system from the repository's **Releases** page, or b
   A copy you downloaded or got from another Mac is quarantined, and macOS blocks it because it is not signed or notarized. Since macOS 15, right-click → **Open** no longer gets past this. Try to open the app once, then go to **System Settings → Privacy & Security**, scroll to **Security**, click **Open Anyway** and confirm ([Apple's instructions](https://support.apple.com/en-us/102445)). If macOS says the app is damaged, remove the quarantine flag instead:
   `xattr -dr com.apple.quarantine /Applications/TopTick.app`
   TopTick has no Dock icon while only the bar is open; use the menu-bar icon.
-- **Windows:** run `TopTick Setup <version>.exe`. If SmartScreen blocks it, click **More info → Run anyway**. The installer is per-user.
+- **Windows:** run `TopTick-<version>-win-x64-setup.exe`. If SmartScreen blocks it, click **More info → Run anyway**. The installer is per-user.
 
 ## Development
 

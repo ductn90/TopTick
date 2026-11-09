@@ -41,5 +41,7 @@ win:
       arch:
         - x64
 nsis:
+  # No spaces: GitHub turns spaces in Release asset names into dots.
+  artifactName: ${productName}-${version}-win-${arch}-setup.${ext}
   oneClick: true
   perMachine: false
