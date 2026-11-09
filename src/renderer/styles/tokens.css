@@ -45,7 +45,7 @@
   --flat: #5D6B82;
   --ref: #FFA800; /* user decision 2026-11-09: below 4.5:1 on purpose (1.93:1 on white), see contrast.test.ts */
   --ceiling: #9333C7;
-  --floor: #5AC8FA; /* user decision 2026-11-09: below 4.5:1 on purpose (1.90:1 on white), see contrast.test.ts */
+  --floor: #009EE8; /* user decision 2026-11-09: below 4.5:1 on purpose (2.98:1 on white), see contrast.test.ts */
   --accent: #037A4B; /* = --up (the icon green #16C784 is only 2.3:1 on white) */
   --selection: #C4E6D6;
   --warn: #DC8A00;

@@ -50,7 +50,7 @@ describe('tokens.css', () => {
  * darker background or a lighter color still fails.
  */
 const USER_EXCEPTIONS: Record<string, { hex: string; min: Record<(typeof BACKGROUNDS)[number], number> }> = {
-  'light --floor': { hex: '#5AC8FA', min: { '--surface-0-base': 1.89, '--surface-1': 1.76 } },
+  'light --floor': { hex: '#009EE8', min: { '--surface-0-base': 2.97, '--surface-1': 2.77 } },
   'light --ref': { hex: '#FFA800', min: { '--surface-0-base': 1.93, '--surface-1': 1.8 } }
 }
 
@@ -117,8 +117,8 @@ describe('measured ratios match the design table', () => {
     ['light', '--down', '--surface-0-base', 5.21],
     ['light', '--down', '--surface-1', 4.86],
     ['light', '--flat', '--surface-1', 5.04],
-    ['light', '--floor', '--surface-0-base', 1.9],
-    ['light', '--floor', '--surface-1', 1.77],
+    ['light', '--floor', '--surface-0-base', 2.98],
+    ['light', '--floor', '--surface-1', 2.78],
     ['light', '--ref', '--surface-0-base', 1.93],
     ['light', '--ref', '--surface-1', 1.81]
   ] as const)('%s %s on %s = %s', (theme, fg, bg, expected) => {
