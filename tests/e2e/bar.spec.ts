@@ -6,6 +6,7 @@ import {
   DEFAULT_OVERVIEW,
   isolateFromRealMouse,
   launch,
+  pinQuotes,
   removeDir,
   tempDir,
   type Launched
@@ -357,4 +358,67 @@ test('each item is a separate tile without divider lines; the marquee moves on e
   )
   expect(frames).toBeGreaterThan(40)
   expect(moves / frames).toBeGreaterThan(0.9)
+})
+test('sparkline line, area and dot use the price tone color in both themes (fake quotes)', async () => {
+  const { app, bar } = ctx
+  // FAKE DATA: [id, ref, price, ceiling, floor] -> expected tone.
+  const rows = [
+    { id: 'vn:FPT', ref: 52_900, price: 56_600, ceiling: 56_600, floor: 49_200, tone: 'ceiling' },
+    { id: 'vn:VCB', ref: 54_200, price: 54_200, ceiling: 57_900, floor: 50_500, tone: 'ref' },
+    { id: 'vn:HPG', ref: 21_500, price: 20_000, ceiling: 23_000, floor: 20_000, tone: 'floor' },
+    { id: 'vn:VNM', ref: 60_000, price: 66_000, tone: 'up' }, // no ceiling/floor: falls back to up
+    { id: 'vn:VNINDEX', ref: 1740, price: 1720, tone: 'down' },
+    { id: 'us:AAPL', ref: 200, price: 200, tone: 'flat' }
+  ]
+  await bar.evaluate(async (ids) => {
+    const { settings } = await window.ticker.getState()
+    const r = await window.ticker.command({ type: 'createWatchlist', name: 'Tones' })
+    if (!r.ok) throw new Error('createWatchlist failed')
+    const list = r.settings.watchlists.find((w) => w.name === 'Tones')!
+    for (const id of ids) {
+      const instrument = settings.instruments[id as keyof typeof settings.instruments]!
+      await window.ticker.command({ type: 'addItem', watchlistId: list.id, instrument })
+    }
+    await window.ticker.command({ type: 'setActiveWatchlist', id: list.id })
+  }, rows.map((r) => r.id))
+  await pinQuotes(app, rows)
+  for (const theme of ['dark', 'light'] as const) {
+    expect((await bar.evaluate((t) => window.ticker.command({ type: 'setTheme', theme: t }), theme)).ok).toBe(true)
+    await expect(bar.locator('html')).toHaveAttribute('data-theme', theme)
+    for (const row of rows) {
+      const item = bar.locator(`[data-copy="0"] [data-testid="ticker-item"][data-id="${row.id}"]`)
+      await expect(item.getByTestId('glyph')).toHaveAttribute('data-tone', row.tone)
+      await expect(item.getByTestId('sparkline')).toHaveAttribute('data-tone', row.tone)
+      await expect(item.getByTestId('price')).not.toHaveAttribute('data-flash')
+      const c = await item.evaluate((el) => {
+        const style = (id: string) => getComputedStyle(el.querySelector(`[data-testid="${id}"]`)!)
+        const root = getComputedStyle(document.documentElement)
+        const probe = document.createElement('span')
+        probe.style.color = root.getPropertyValue('--text-3')
+        document.body.append(probe)
+        const text3 = getComputedStyle(probe).color
+        probe.remove()
+        return {
+          line: style('spark-line').stroke,
+          area: style('spark-area').fill,
+          areaOpacity: style('spark-area').fillOpacity,
+          dot: style('spark-dot').fill,
+          refLine: style('ref-line').stroke,
+          text3,
+          pct: style('pct').color,
+          glyph: style('glyph').color,
+          price: style('price').color
+        }
+      })
+      expect(c.line, `${theme} ${row.id}`).toBe(c.pct)
+      expect(c.line).toBe(c.glyph)
+      expect(c.area).toBe(c.line)
+      expect(c.dot).toBe(c.line)
+      expect(Number(c.areaOpacity)).toBeLessThanOrEqual(0.12)
+      // The price number is tinted only at VN ref/ceiling/floor; there it matches the chart too.
+      if (row.tone === 'ref' || row.tone === 'ceiling' || row.tone === 'floor') expect(c.price).toBe(c.line)
+      // The dashed reference line keeps its neutral color.
+      expect(c.refLine).toBe(c.text3)
+    }
+  }
 })

@@ -19,3 +19,12 @@ export function priceTone(q: Pick<Quote, 'price' | 'refPrice' | 'change' | 'ceil
   if (q.change < 0) return 'down'
   return 'flat'
 }
+
+/**
+ * Tone of a bar item: `flat` while loading or in error, otherwise `priceTone`. The glyph, the
+ * price, the % change and the sparkline all take their color from this one value.
+ */
+export function itemTone(q: Quote | undefined, market: Market): PriceTone {
+  if (!q || q.state === 'loading' || q.state === 'error') return 'flat'
+  return priceTone(q, market)
+}

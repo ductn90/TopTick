@@ -16,6 +16,19 @@
   color: var(--flat);
 }
 
+/* VN: the same tones as the glyph, price and % (TickerItem, PriceText); a tone change is an instant color switch. */
+.ref {
+  color: var(--ref);
+}
+
+.ceiling {
+  color: var(--ceiling);
+}
+
+.floor {
+  color: var(--floor);
+}
+
 .area {
   fill: currentColor;
   fill-opacity: var(--spark-fill-alpha);
@@ -31,7 +44,8 @@
   vector-effect: non-scaling-stroke;
 }
 
-.ref {
+/* The dashed reference line stays neutral whatever the tone. */
+.refLine {
   stroke: var(--text-3);
   stroke-width: 1px;
   stroke-dasharray: 2 2;

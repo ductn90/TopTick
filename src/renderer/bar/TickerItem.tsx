@@ -1,10 +1,10 @@
 import { memo } from 'react'
 import { directionGlyph, formatPct, formatPrice, formatTime } from '../../shared/format'
 import { t, type MessageKey } from '../../shared/i18n'
-import { priceTone, type PriceTone } from '../../shared/priceTone'
+import { itemTone } from '../../shared/priceTone'
 import type { Instrument, InstrumentId, Language, Quote, QuoteSource, Series } from '../../shared/types'
 import { PriceText } from './PriceText'
-import { Sparkline, type Direction } from './Sparkline'
+import { Sparkline } from './Sparkline'
 import styles from './TickerItem.module.css'
 
 export interface ItemModel {
@@ -29,19 +29,6 @@ const STATE_NOTE: Partial<Record<Quote['state'], MessageKey>> = {
   error: 'bar.error'
 }
 
-function tone(item: ItemModel): PriceTone {
-  const q = item.quote
-  if (!q || q.state === 'loading' || q.state === 'error') return 'flat'
-  return priceTone(q, item.instrument.market)
-}
-
-/** The sparkline keeps the plain direction: purple/cyan/yellow apply to the glyph and numbers only. */
-function direction(q: Quote | undefined, tn: PriceTone): Direction {
-  if (tn === 'up' || tn === 'down' || tn === 'flat') return tn
-  if (!q || q.change === 0) return 'flat'
-  return q.change > 0 ? 'up' : 'down'
-}
-
 /** "FPT · Vietcap · 10:31:05", plus the state note when not live. */
 function tooltip(item: ItemModel, lang: Language): string {
   const { instrument, quote } = item
@@ -60,8 +47,8 @@ function TickerItemImpl({ item, lang }: { item: ItemModel; lang: Language }): Re
   const state = quote?.state ?? 'loading'
   const loading = state === 'loading'
   const error = state === 'error'
-  const tn = tone(item)
-  const dir = direction(quote, tn)
+  // One tone for the glyph, price, % and sparkline.
+  const tn = itemTone(quote, instrument.market)
   const name = (lang === 'vi' ? instrument.nameVi : instrument.nameEn) || instrument.nameEn || instrument.symbol
   const className = [styles.item, state === 'stale' && styles.stale].filter(Boolean).join(' ')
 
@@ -87,7 +74,7 @@ function TickerItemImpl({ item, lang }: { item: ItemModel; lang: Language }): Re
         <Sparkline
           points={series?.points ?? []}
           refPrice={series?.refPrice ?? quote?.refPrice ?? 0}
-          direction={dir}
+          tone={tn}
         />
       )}
       <div className={styles.right}>

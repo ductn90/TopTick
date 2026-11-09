@@ -83,4 +83,43 @@ export function barWindow(app: ElectronApplication): Promise<BarWindowInfo> {
   })
 }
 
+/** Made-up quote for `pinQuotes`: price against ref, optional VN ceiling/floor. */
+export interface PinnedQuote {
+  id: string
+  ref: number
+  price: number
+  ceiling?: number
+  floor?: number
+}
+
+/**
+ * FAKE DATA. Sends made-up quotes and series for `rows` to the bar, and rewrites every later
+ * market message for those ids so the fake provider's ticks never replace them.
+ */
+export async function pinQuotes(app: ElectronApplication, rows: PinnedQuote[]): Promise<void> {
+  const diff: { quotes: Record<string, unknown>; series: Record<string, unknown> } = { quotes: {}, series: {} }
+  for (const { id, ref, price, ceiling, floor } of rows) {
+    const change = price - ref
+    diff.quotes[id] = { id, price, refPrice: ref, change, changePct: (change / ref) * 100, state: 'live', source: 'fake', updatedAt: Date.now(), ceiling, floor }
+    const points = Array.from({ length: 40 }, (_, i) => ref + ((price - ref) * i) / 39 + Math.sin(i / 3) * ref * 0.004)
+    points[39] = price
+    diff.series[id] = { id, points, refPrice: ref, updatedAt: Date.now() }
+  }
+  await app.evaluate(({ BrowserWindow }, d) => {
+    const w = BrowserWindow.getAllWindows().find((win) => win.webContents.getURL().includes('bar.html'))!
+    const wc = w.webContents
+    const send = wc.send.bind(wc)
+    wc.send = (channel: string, msg: { quotes?: Record<string, unknown>; series?: Record<string, unknown> }, ...rest: unknown[]) => {
+      if ((channel === 'market:update' || channel === 'market:snapshot') && msg?.quotes) {
+        for (const id of Object.keys(d.quotes)) {
+          if (id in msg.quotes) msg.quotes[id] = d.quotes[id]
+          if (msg.series && id in msg.series) msg.series[id] = d.series[id]
+        }
+      }
+      return send(channel, msg, ...rest)
+    }
+    send('market:update', d)
+  }, diff)
+}
+
 export const DEFAULT_OVERVIEW = ['VNINDEX', 'S&P 500', 'NASDAQ', 'BTC/USDT', 'ETH/USDT', 'FPT', 'AAPL', 'NVDA']
