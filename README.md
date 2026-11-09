@@ -18,7 +18,6 @@ TopTick is a small desktop bar that scrolls live prices for Vietnamese stocks an
 - Tray / menu-bar icon with pause, lock, click-through and Settings.
 
 ## Screenshots
-
 ![TopTick bar in the dark theme](docs/screenshots/bar-dark.png)
 
 ![TopTick bar in the light theme](docs/screenshots/bar-light.png)
