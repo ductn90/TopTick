@@ -53,9 +53,9 @@ export function vnInSession(nowMs: number): boolean {
   return vnSessionState(nowMs) === 'open'
 }
 
-export const VN_POLL_MS = { vietcap: 3000, cafef: 10_000, outOfSession: 60_000 } as const
+export const VN_POLL_MS = { vietcap: 3000, cafef: 10_000, ssi: 5000, outOfSession: 60_000 } as const
 
-export function vnPollIntervalMs(source: 'vietcap' | 'cafef', nowMs: number): number {
+export function vnPollIntervalMs(source: 'vietcap' | 'cafef' | 'ssi', nowMs: number): number {
   return vnInSession(nowMs) ? VN_POLL_MS[source] : VN_POLL_MS.outOfSession
 }
 
@@ -77,4 +77,40 @@ export function usInSession(nowMs: number, period: TradingPeriod | null | undefi
 export function usRegularOpen(nowMs: number, period: TradingPeriod | null | undefined): boolean {
   if (!period) return false
   return nowMs >= period.start * 1000 && nowMs < period.end * 1000
+}
+
+const ET_FORMAT = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'America/New_York',
+  hourCycle: 'h23',
+  weekday: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit'
+})
+
+const WEEKDAYS = new Set(['Mon', 'Tue', 'Wed', 'Thu', 'Fri'])
+const US_OPEN_MIN = 9 * 60 + 30
+const US_CLOSE_MIN = 16 * 60
+
+/** New York weekday and minutes since midnight (fractional), DST included. */
+function etParts(nowMs: number): { weekday: boolean; minutes: number } {
+  const parts = Object.fromEntries(ET_FORMAT.formatToParts(nowMs).map((p) => [p.type, p.value]))
+  const minutes = Number(parts.hour) * 60 + Number(parts.minute) + Number(parts.second) / 60
+  return { weekday: WEEKDAYS.has(parts.weekday ?? ''), minutes }
+}
+
+/**
+ * Scheduled US regular session, Mon–Fri 09:30 ≤ New York time < 16:00, for
+ * sources without trading periods (CNBC). Holidays are not modeled.
+ */
+export function usScheduledRegularOpen(nowMs: number): boolean {
+  const { weekday, minutes } = etParts(nowMs)
+  return weekday && minutes >= US_OPEN_MIN && minutes < US_CLOSE_MIN
+}
+
+/** {@link usScheduledRegularOpen} widened by ±5 min (polling rate and staleness). */
+export function usScheduledInSession(nowMs: number): boolean {
+  const { weekday, minutes } = etParts(nowMs)
+  const margin = US_SESSION_MARGIN_MS / 60_000
+  return weekday && minutes >= US_OPEN_MIN - margin && minutes <= US_CLOSE_MIN + margin
 }

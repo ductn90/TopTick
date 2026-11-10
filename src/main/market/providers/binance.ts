@@ -13,19 +13,12 @@ import {
   type ProviderDeps,
   type ProviderEvents
 } from './types'
+import type { WebSocketCtor, WebSocketLike } from './ws'
 
 export const BINANCE_WS = 'wss://stream.binance.com:9443/stream'
 export const BINANCE_REST = 'https://api.binance.com/api/v3'
 
-/** Minimal WebSocket surface used here (Node/Electron global `WebSocket` satisfies it). */
-export interface WebSocketLike {
-  onopen: ((ev: unknown) => void) | null
-  onmessage: ((ev: { data: unknown }) => void) | null
-  onclose: ((ev: unknown) => void) | null
-  onerror: ((ev: unknown) => void) | null
-  close(): void
-}
-export type WebSocketCtor = new (url: string) => WebSocketLike
+export type { WebSocketLike, WebSocketCtor } from './ws'
 
 const num = z.union([z.string(), z.number()]).transform(toNumber)
 
@@ -205,10 +198,12 @@ export function createBinanceProvider(deps: BinanceDeps): BinanceProvider {
     }
   }
 
-  /** WebSocket is down: schedule a reconnect and, after 10 s, REST polling. */
+  /**
+   * WebSocket is down: schedule a reconnect and, after 10 s, REST polling. A drop
+   * alone is not a failed cycle; the REST cycles report health (failover).
+   */
   function onDown(): void {
     if (!started) return
-    events.emit('health', { ok: false, error: 'websocket down' })
     const delay = backoffDelay(attempt++, random)
     reconnectTimer = clear(reconnectTimer)
     reconnectTimer = timers.setTimeout(connect, delay)
@@ -218,7 +213,8 @@ export function createBinanceProvider(deps: BinanceDeps): BinanceProvider {
   async function pollRest(): Promise<void> {
     restTimer = null
     if (!started || connected || symbols.length === 0) return
-    await pollOnce()
+    const ok = await pollOnce()
+    if (started && !connected) events.emit('health', ok ? { ok } : { ok, error: 'binance rest failed' })
     if (started && !connected && restTimer === null) restTimer = timers.setTimeout(pollRest, REST_POLL_MS)
   }
 

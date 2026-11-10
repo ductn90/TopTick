@@ -4,6 +4,7 @@ import { vi, type Mock } from 'vitest'
 import type { FetchJson, FetchJsonOptions, FetchResult } from '../../src/main/http'
 import type { Logger } from '../../src/main/log'
 import { realTimers } from '../../src/main/market/providers/types'
+import type { SendingWebSocketLike } from '../../src/main/market/providers/ws'
 
 const FIXTURES = join(__dirname, '..', 'fixtures')
 
@@ -52,4 +53,43 @@ export function timerDeps(fetchJson: FetchJson) {
 /** Let pending promise callbacks run. */
 export async function flushPromises(rounds = 5): Promise<void> {
   for (let i = 0; i < rounds; i++) await Promise.resolve()
+}
+
+/** Fake socket for the WebSocket providers; `sent` records what the provider wrote. */
+export class FakeSendingWebSocket implements SendingWebSocketLike {
+  static instances: FakeSendingWebSocket[] = []
+  onopen: ((ev: unknown) => void) | null = null
+  onmessage: ((ev: { data: unknown }) => void) | null = null
+  onclose: ((ev: unknown) => void) | null = null
+  onerror: ((ev: unknown) => void) | null = null
+  closed = false
+  sent: string[] = []
+
+  constructor(readonly url: string) {
+    FakeSendingWebSocket.instances.push(this)
+  }
+
+  send(data: string): void {
+    this.sent.push(data)
+  }
+
+  close(): void {
+    this.closed = true
+  }
+
+  open(): void {
+    this.onopen?.({})
+  }
+
+  message(data: unknown): void {
+    this.onmessage?.({ data: typeof data === 'string' ? data : JSON.stringify(data) })
+  }
+
+  drop(): void {
+    this.onclose?.({})
+  }
+
+  static last(): FakeSendingWebSocket {
+    return FakeSendingWebSocket.instances[FakeSendingWebSocket.instances.length - 1]!
+  }
 }

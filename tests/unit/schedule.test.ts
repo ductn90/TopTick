@@ -3,6 +3,8 @@ import {
   ictParts,
   usInSession,
   usRegularOpen,
+  usScheduledInSession,
+  usScheduledRegularOpen,
   vnInSession,
   vnPollIntervalMs,
   vnSessionState
@@ -52,6 +54,38 @@ describe('vnPollIntervalMs', () => {
     expect(vnPollIntervalMs('cafef', fri(10, 0))).toBe(10_000)
     expect(vnPollIntervalMs('vietcap', fri(12, 0))).toBe(60_000)
     expect(vnPollIntervalMs('cafef', fri(16, 0))).toBe(60_000)
+  })
+
+  it('polls SSI every 5 s in session and 60 s outside', () => {
+    expect(vnPollIntervalMs('ssi', fri(10, 0))).toBe(5000)
+    expect(vnPollIntervalMs('ssi', fri(16, 0))).toBe(60_000)
+  })
+})
+
+describe('usScheduledRegularOpen / usScheduledInSession (New York time)', () => {
+  // Monday 2026-11-09 is EST (UTC-5): 09:30 ET = 14:30 UTC, 16:00 ET = 21:00 UTC.
+  it('follows 09:30–16:00 ET on an EST day', () => {
+    expect(usScheduledRegularOpen(Date.UTC(2026, 10, 9, 14, 30))).toBe(true)
+    expect(usScheduledRegularOpen(Date.UTC(2026, 10, 9, 14, 29))).toBe(false)
+    expect(usScheduledRegularOpen(Date.UTC(2026, 10, 9, 20, 59))).toBe(true)
+    expect(usScheduledRegularOpen(Date.UTC(2026, 10, 9, 21, 0))).toBe(false)
+  })
+
+  it('handles DST: 09:30 EDT is 13:30 UTC', () => {
+    expect(usScheduledRegularOpen(Date.UTC(2026, 6, 6, 13, 30))).toBe(true)
+    expect(usScheduledRegularOpen(Date.UTC(2026, 6, 6, 13, 29))).toBe(false)
+  })
+
+  it('is closed on weekends', () => {
+    expect(usScheduledRegularOpen(Date.UTC(2026, 10, 7, 15, 0))).toBe(false) // Saturday
+    expect(usScheduledInSession(Date.UTC(2026, 10, 8, 15, 0))).toBe(false) // Sunday
+  })
+
+  it('widens the session by ±5 min', () => {
+    expect(usScheduledInSession(Date.UTC(2026, 10, 9, 14, 25))).toBe(true)
+    expect(usScheduledInSession(Date.UTC(2026, 10, 9, 14, 24, 59))).toBe(false)
+    expect(usScheduledInSession(Date.UTC(2026, 10, 9, 21, 5))).toBe(true)
+    expect(usScheduledInSession(Date.UTC(2026, 10, 9, 21, 5, 1))).toBe(false)
   })
 })
 

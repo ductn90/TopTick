@@ -2,19 +2,23 @@ import { join } from 'node:path'
 import { app, BrowserWindow, dialog, nativeTheme, powerMonitor } from 'electron'
 import electronLog from 'electron-log/main'
 import { createBarVisibility } from './barVisibility'
-import { createFetchJson, parseForceFail, type FetchJson } from './http'
+import { createFetchJson, forceFailFromEnv, type FetchJson } from './http'
 import { createInstrumentProvenance } from './instrumentProvenance'
 import { buildWatchlistMenuTemplate, createCommandRunner, registerIpcHandlers, type RunCommand } from './ipcHandlers'
 import { createConsoleLogger, createMainLogger, type Logger } from './log'
 import { createDirectory, type Directory } from './market/directory'
+import { createFailoverSource } from './market/failover'
 import { createMarketHub, visibleIds, type MarketHub } from './market/hub'
-import { createBinanceProvider, type WebSocketCtor } from './market/providers/binance'
+import { createBinanceProvider } from './market/providers/binance'
 import { createCafefProvider } from './market/providers/cafef'
+import { createCnbcProvider } from './market/providers/cnbc'
 import { createFakeProvider } from './market/providers/fake'
+import { createOkxProvider } from './market/providers/okx'
+import { createSsiProvider } from './market/providers/ssi'
 import { realTimers, type Provider } from './market/providers/types'
 import { createVietcapProvider } from './market/providers/vietcap'
+import { webSocketFor, type SendingWebSocketCtor, type WebSocketCtor } from './market/providers/ws'
 import { createYahooProvider } from './market/providers/yahoo'
-import { createVnSource } from './market/vnSource'
 import { createDefaults } from './settings/defaults'
 import { createSettingsStore, type SettingsStore } from './settings/store'
 import { createThemeController, type ThemeController } from './theme'
@@ -53,7 +57,11 @@ function broadcast(channel: string, payload: unknown): void {
   }
 }
 
-function createProviders(fetchJson: FetchJson, boardOf: Directory['boardOf']): Record<Market, Provider> {
+function createProviders(
+  fetchJson: FetchJson,
+  boardOf: Directory['boardOf'],
+  forceFail: ReadonlySet<string>
+): Record<Market, Provider> {
   const now = Date.now
   if (FAKE_DATA) {
     // One fake walk serves every market (offline UI work and e2e).
@@ -61,11 +69,24 @@ function createProviders(fetchJson: FetchJson, boardOf: Directory['boardOf']): R
     return { crypto: fake, vn: fake, us: fake }
   }
   const deps = { fetchJson, log, now, timers: realTimers }
-  const binance = createBinanceProvider({ ...deps, WebSocket: globalThis.WebSocket as unknown as WebSocketCtor })
-  const vietcap = createVietcapProvider(deps)
-  const cafef = createCafefProvider({ ...deps, boardOf })
-  const vn = createVnSource({ primary: vietcap, fallback: cafef, log, timers: realTimers })
-  return { crypto: binance, vn, us: createYahooProvider(deps) }
+  const binance = createBinanceProvider({
+    ...deps,
+    WebSocket: webSocketFor('binance', forceFail, globalThis.WebSocket as unknown as WebSocketCtor)
+  })
+  const okx = createOkxProvider({
+    ...deps,
+    WebSocket: webSocketFor('okx', forceFail, globalThis.WebSocket as unknown as SendingWebSocketCtor)
+  })
+  const failover = { log, timers: realTimers }
+  return {
+    crypto: createFailoverSource({ ...failover, market: 'crypto', chain: [binance, okx] }),
+    vn: createFailoverSource({
+      ...failover,
+      market: 'vn',
+      chain: [createVietcapProvider(deps), createCafefProvider({ ...deps, boardOf }), createSsiProvider(deps)]
+    }),
+    us: createFailoverSource({ ...failover, market: 'us', chain: [createYahooProvider(deps), createCnbcProvider(deps)] })
+  }
 }
 
 function start(): Runtime {
@@ -81,10 +102,8 @@ function start(): Runtime {
   })
   const tr = (key: MessageKey): string => t(store.get().language, key)
 
-  const fetchJson = createFetchJson({
-    version: app.getVersion(),
-    forceFail: parseForceFail(process.env.TOPTICK_VN_FORCE_FAIL)
-  })
+  const forceFail = forceFailFromEnv(process.env)
+  const fetchJson = createFetchJson({ version: app.getVersion(), forceFail })
   const directory = createDirectory({
     fetchJson,
     log,
@@ -116,7 +135,7 @@ function start(): Runtime {
     }
   })
 
-  const providers = createProviders(fetchJson, directory.boardOf)
+  const providers = createProviders(fetchJson, directory.boardOf, forceFail)
   const hub = createMarketHub({
     providers,
     emit: (diff) => {

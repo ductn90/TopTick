@@ -1,0 +1,26 @@
+{
+  "arg": {
+    "channel": "tickers",
+    "instId": "BTC-USDT"
+  },
+  "data": [
+    {
+      "instType": "SPOT",
+      "instId": "BTC-USDT",
+      "last": "74051.3",
+      "lastSz": "0.05",
+      "askPx": "74051.4",
+      "askSz": "0.3462962",
+      "bidPx": "74051.3",
+      "bidSz": "0.11538488",
+      "open24h": "75874.6",
+      "high24h": "76200",
+      "low24h": "73500",
+      "sodUtc0": "74850.1",
+      "sodUtc8": "76074.8",
+      "volCcy24h": "555669236.109508133",
+      "vol24h": "7423.16789663",
+      "ts": "1794209619974"
+    }
+  ]
+}

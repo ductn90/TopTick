@@ -1,0 +1,8 @@
+{
+  "event": "subscribe",
+  "arg": {
+    "channel": "tickers",
+    "instId": "BTC-USDT"
+  },
+  "connId": "81afde44"
+}

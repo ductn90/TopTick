@@ -121,6 +121,8 @@ export function createYahooProvider(deps: ProviderDeps): YahooProvider {
   let started = false
   /** Consecutive 401/403/429 responses, shared by all symbols (rate limits are per client). */
   let blockedFailures = 0
+  /** Latest result per symbol (404s left out), for the health signal. */
+  const latest = new Map<string, boolean>()
 
   const backoffMs = (): number =>
     blockedFailures === 0 ? 0 : Math.min(YAHOO_BACKOFF_MAX_MS, YAHOO_BACKOFF_BASE_MS * 2 ** blockedFailures)
@@ -132,10 +134,25 @@ export function createYahooProvider(deps: ProviderDeps): YahooProvider {
     return usInSession(now(), period) ? YAHOO_POLL_MS.inSession : YAHOO_POLL_MS.outOfSession
   }
 
-  async function fetchSymbol(symbol: string): Promise<'ok' | 'blocked' | 'failed'> {
+  type FetchOutcome = 'ok' | 'blocked' | 'failed' | 'missing'
+
+  /** Fetches one symbol and records the outcome for the health signal (404s are left out). */
+  async function fetchSymbol(symbol: string): Promise<FetchOutcome> {
+    const result = await fetchChart(symbol)
+    if (result === 'missing' || !symbols.includes(symbol)) latest.delete(symbol)
+    else latest.set(symbol, result === 'ok')
+    return result
+  }
+
+  /** `missing` = HTTP 404 (unknown or delisted symbol): Yahoo answered, so it is not a failed cycle. */
+  async function fetchChart(symbol: string): Promise<FetchOutcome> {
     const res = await fetchJson(`${YAHOO_CHART_URL}/${encodeURIComponent(symbol)}?range=1d&interval=5m`, {
       provider: 'yahoo'
     })
+    if (!res.ok && res.kind === 'http' && res.status === 404) {
+      log.debug(`yahoo: ${symbol} not found`)
+      return 'missing'
+    }
     if (!res.ok) {
       const blocked = res.kind === 'http' && res.status !== undefined && BACKOFF_STATUSES.has(res.status)
       if (blocked) blockedFailures++
@@ -169,7 +186,12 @@ export function createYahooProvider(deps: ProviderDeps): YahooProvider {
     if (!started || !symbols.includes(symbol)) return
     const result = await fetchSymbol(symbol)
     if (!started || !symbols.includes(symbol)) return
-    events.emit('health', result === 'ok' ? { ok: true } : { ok: false, error: `yahoo ${symbol} ${result}` })
+    // Health per fetch: ok while any symbol's latest fetch worked, so one bad symbol (which may
+    // poll more often than the others) does not count as a failed Yahoo cycle.
+    if (result !== 'missing') {
+      const anyOk = [...latest.values()].some(Boolean)
+      events.emit('health', anyOk ? { ok: true } : { ok: false, error: `yahoo ${symbol} ${result}` })
+    }
     if (pollTimers.has(symbol)) return
     schedule(symbol, Math.max(normalInterval(symbol), backoffMs()))
   }
@@ -195,6 +217,7 @@ export function createYahooProvider(deps: ProviderDeps): YahooProvider {
         if (h !== undefined) timers.clearTimeout(h)
         pollTimers.delete(s)
         periods.delete(s)
+        latest.delete(s)
       }
       symbols = next
       if (started) added.forEach((s, i) => schedule(s, i * YAHOO_STAGGER_MS))
@@ -211,7 +234,8 @@ export function createYahooProvider(deps: ProviderDeps): YahooProvider {
     },
     async pollOnce() {
       const results = await Promise.all(symbols.map(fetchSymbol))
-      return results.every((r) => r === 'ok')
+      // Same rule as the health signal: Yahoo works if any symbol answered (404s are answers).
+      return results.length === 0 || results.some((r) => r === 'ok') || results.every((r) => r === 'missing')
     },
     on: (event, cb) => events.on(event, cb),
     inSession: (id, t) => usInSession(t, periods.get(id.slice(3)))

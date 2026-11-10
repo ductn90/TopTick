@@ -9,7 +9,7 @@ export interface FetchJsonOptions {
   /** JSON-serialized and sent with `Content-Type: application/json`. */
   body?: unknown
   timeoutMs?: number
-  /** Provider tag, used by the `TOPTICK_VN_FORCE_FAIL` dev hook. */
+  /** Provider tag, used by the `TOPTICK_*_FORCE_FAIL` dev hooks (see {@link forceFailFromEnv}). */
   provider?: string
 }
 
@@ -17,7 +17,7 @@ export type FetchJson = (url: string, options?: FetchJsonOptions) => Promise<Fet
 
 export interface FetchJsonConfig {
   version: string
-  /** Provider tags whose calls fail with `network` (see {@link parseForceFail}). */
+  /** Provider tags whose calls fail with `network` (see {@link forceFailFromEnv}). */
   forceFail?: ReadonlySet<string>
   /** Defaults to the global `fetch`. */
   fetchImpl?: typeof fetch
@@ -25,18 +25,34 @@ export interface FetchJsonConfig {
 
 export const DEFAULT_TIMEOUT_MS = 8000
 
-/** `TOPTICK_VN_FORCE_FAIL=vietcap|cafef|all` -> provider tags to fail. Unknown values are ignored. */
-export function parseForceFail(value: string | undefined): Set<string> {
-  switch (value?.trim().toLowerCase()) {
-    case 'vietcap':
-      return new Set(['vietcap'])
-    case 'cafef':
-      return new Set(['cafef'])
-    case 'all':
-      return new Set(['vietcap', 'cafef'])
-    default:
-      return new Set()
+/** Provider tags per market accepted by the `TOPTICK_*_FORCE_FAIL` dev hooks, in chain order. */
+export const FORCE_FAIL_TAGS = {
+  vn: ['vietcap', 'cafef', 'ssi'],
+  crypto: ['binance', 'okx'],
+  us: ['yahoo', 'cnbc']
+} as const
+
+/**
+ * A comma list of provider tags (`vietcap,cafef`) or `all` -> tags to fail.
+ * Case and spaces are ignored; tags not in `allowed` are dropped.
+ */
+export function parseForceFail(value: string | undefined, allowed: readonly string[] = FORCE_FAIL_TAGS.vn): Set<string> {
+  const out = new Set<string>()
+  for (const raw of (value ?? '').split(',')) {
+    const tag = raw.trim().toLowerCase()
+    if (tag === 'all') allowed.forEach((t) => out.add(t))
+    else if (allowed.includes(tag)) out.add(tag)
   }
+  return out
+}
+
+/** Union of `TOPTICK_VN_FORCE_FAIL`, `TOPTICK_CRYPTO_FORCE_FAIL` and `TOPTICK_US_FORCE_FAIL`. */
+export function forceFailFromEnv(env: Record<string, string | undefined>): Set<string> {
+  return new Set([
+    ...parseForceFail(env.TOPTICK_VN_FORCE_FAIL, FORCE_FAIL_TAGS.vn),
+    ...parseForceFail(env.TOPTICK_CRYPTO_FORCE_FAIL, FORCE_FAIL_TAGS.crypto),
+    ...parseForceFail(env.TOPTICK_US_FORCE_FAIL, FORCE_FAIL_TAGS.us)
+  ])
 }
 
 function isTimeout(err: unknown): boolean {

@@ -203,6 +203,35 @@ describe('BinanceProvider', () => {
     p.stop()
   })
 
+  it('a drop is not a failed cycle; REST cycles report health while the socket is down', async () => {
+    let restDown = true
+    const net = fakeFetch((url) => {
+      if (url.includes('/ticker/24hr')) return restDown ? fail('http', 403) : ok(fixture('binance/ticker24hr.json'))
+      return fail('http', 404)
+    })
+    const p = createBinanceProvider({ ...timerDeps(net.fetchJson), WebSocket: FakeWebSocket, random: () => 0.5 })
+    const health: boolean[] = []
+    p.on('health', (h) => health.push(h.ok))
+    p.setSubscriptions(['crypto:BTCUSDT'])
+    p.start()
+    const keepFailing = setInterval(() => {
+      const ws = FakeWebSocket.last()
+      if (!ws.closed) ws.drop()
+    }, 100)
+    FakeWebSocket.last().drop()
+    await vi.advanceTimersByTimeAsync(9_999)
+    expect(health).toEqual([])
+    await vi.advanceTimersByTimeAsync(1)
+    expect(health).toEqual([false])
+    await vi.advanceTimersByTimeAsync(10_000)
+    expect(health).toEqual([false, false, false])
+    restDown = false
+    await vi.advanceTimersByTimeAsync(5_000)
+    expect(health).toEqual([false, false, false, true])
+    clearInterval(keepFailing)
+    p.stop()
+  })
+
   it('debounces subscription changes by 500 ms into one reconnect', () => {
     const { p } = setup()
     p.setSubscriptions(['crypto:BTCUSDT'])

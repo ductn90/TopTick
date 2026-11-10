@@ -15,7 +15,7 @@ export interface Instrument {
 }
 
 export type QuoteState = 'live' | 'preopen' | 'closed' | 'stale' | 'loading' | 'error'
-export type QuoteSource = 'binance' | 'vietcap' | 'cafef' | 'yahoo' | 'fake'
+export type QuoteSource = 'binance' | 'okx' | 'vietcap' | 'cafef' | 'ssi' | 'yahoo' | 'cnbc' | 'fake'
 
 export interface Quote {
   id: InstrumentId

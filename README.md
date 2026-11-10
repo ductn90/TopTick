@@ -67,7 +67,9 @@ All of them are for development and testing. The app needs none of them.
 | Variable | Purpose | Default |
 |---|---|---|
 | `TOPTICK_FAKE_DATA=1` | Offline mode: generated prices for every market and a static symbol list for search. | Off (real data) |
-| `TOPTICK_VN_FORCE_FAIL=vietcap\|cafef\|all` | Makes the named Vietnamese data source fail, to show the switch to CafeF (`vietcap`) or the stale indicator (`all`). Also read by `npm run compare-live`. | Unset |
+| `TOPTICK_VN_FORCE_FAIL=vietcap\|cafef\|ssi\|all` | Makes the named Vietnamese data sources fail. Takes one name, a comma list or `all`: `vietcap` shows the switch to CafeF, `vietcap,cafef` the switch to SSI iBoard, `all` the stale indicator. Also read by `npm run compare-live`. | Unset |
+| `TOPTICK_CRYPTO_FORCE_FAIL=binance\|okx\|all` | The same for crypto: `binance` shows the switch to OKX, `all` the stale indicator. Also read by `npm run compare-live`. | Unset |
+| `TOPTICK_US_FORCE_FAIL=yahoo\|cnbc\|all` | The same for US stocks: `yahoo` shows the switch to CNBC, `all` the stale indicator. Also read by `npm run compare-live`. | Unset |
 | `TOPTICK_USER_DATA_DIR=<dir>` | Stores settings, logs and cache in `<dir>` instead of the normal app-data folder. The end-to-end tests use it to isolate runs. | The OS app-data folder |
 | `TOPTICK_LIVE=1` | Runs the live-data end-to-end test (`tests/e2e/live.spec.ts`), which is skipped otherwise. | Off |
 
@@ -88,13 +90,13 @@ The builds are unsigned, so macOS and Windows warn on first launch (see [Install
 
 ## Data sources
 
-| Market | Source | Updates |
-|---|---|---|
-| Vietnamese stocks and indices | Vietcap trading API (`trading.vietcap.com.vn`); CafeF (`banggia.cafef.vn`) as fallback | Every 3 s in session (Vietcap), every 10 s from CafeF, 60 s outside the session |
-| Crypto | Binance WebSocket and REST (`api.binance.com`) | Every second |
-| US stocks and indices | Yahoo Finance chart API (`query1.finance.yahoo.com`) | Every 10 s per symbol, regular session only |
+| Market | Primary source | Backups, in order | Updates |
+|---|---|---|---|
+| Vietnamese stocks and indices | Vietcap trading API (`trading.vietcap.com.vn`) | CafeF (`banggia.cafef.vn`), then SSI iBoard (`iboard.ssi.com.vn`) | Every 3 s in session from Vietcap, 10 s from CafeF, 5 s from SSI; 60 s outside the session |
+| Crypto | Binance WebSocket and REST (`api.binance.com`) | OKX WebSocket and REST (`www.okx.com`) | Every second |
+| US stocks and indices | Yahoo Finance chart API (`query1.finance.yahoo.com`) | CNBC quotes (`quote.cnbc.com`) | Every 10 s in the regular session |
 
-These are free, public but unofficial endpoints. They can change or block access at any time. Crypto prices are USDT pairs, so they differ slightly from USD quotes. When a source stops answering during its session, items keep their last value and show a stale dot. The tooltip on each item shows the source and the time of the last update.
+These are free, public but unofficial endpoints, for personal, informational use only and not financial advice. They can change or block access at any time. When the primary source fails several times in a row, the app switches to the next backup, and it switches back once the primary answers again. Crypto prices are USDT pairs, so they differ slightly from USD quotes. When every source of a market stops answering during its session, items keep their last value and show a stale dot. The tooltip on each item shows the source and the time of the last update.
 
 ## Settings and logs
 
@@ -105,6 +107,7 @@ Settings are saved to `settings.json` in the app-data folder: `~/Library/Applica
 - **Windows is untested.** The Windows installer builds, but it has never been run on Windows. Window behavior, drag and edge resize, the tray icon, theme following and the installer may not work there.
 - **Unsigned builds.** There are no signed or notarized builds. A downloaded or copied macOS build is blocked until you allow it (see [Install](#install)). Windows SmartScreen may warn about the installer.
 - **Unofficial data.** All data sources are unofficial and may change, lag or stop working. US prices cover the regular session only, without pre- or post-market.
+- **Backup sources are thinner.** CafeF has no index sparklines. On SSI iBoard and CNBC the tooltip time is when the app fetched the price, not the trade time. Crypto pairs that OKX does not list, and US indices other than the S&P 500, Nasdaq Composite, Dow Jones and Nasdaq-100, stop updating and show the stale dot while their market runs on the backup. CNBC prices are Nasdaq last-sale prices and can differ slightly from Yahoo's.
 - **Pause when not visible (macOS).** Scrolling pauses when the bar is hidden and when a much larger window from another app covers it. A window only slightly wider than the bar is not detected as covering it. Pausing on screen lock, sleep and user switching is wired up but has not been checked with real OS events. A display that sleeps without locking does not pause the scroll.
 - **Resource use.** TopTick is an Electron app: about 250 MB on disk (the dmg is about 110 MB) and about 350–450 MB of memory across its processes.
 
@@ -113,4 +116,4 @@ Settings are saved to `settings.json` in the app-data folder: `~/Library/Applica
 The code is released under the [MIT License](LICENSE).
 
 - **Icons:** the app, tray and in-app icons come from the [Solar icon set](https://github.com/480-Design/Solar-Icon-Set) by 480 Design (via [Streamline](https://www.streamlinehq.com/)), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The app and tray icons are modified from Solar's "Graph Up". The MIT License does not cover them.
-- **Market data** comes from third-party endpoints (Vietcap, CafeF, Yahoo Finance, Binance). It is not covered by the MIT License and belongs to its providers. It is for personal, informational use only and is not financial advice. Do not redistribute it.
+- **Market data** comes from third-party endpoints (Vietcap, CafeF, SSI iBoard, Binance, OKX, Yahoo Finance, CNBC). It is not covered by the MIT License and belongs to its providers. It is for personal, informational use only and is not financial advice. Do not redistribute it.

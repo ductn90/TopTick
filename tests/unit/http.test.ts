@@ -1,7 +1,7 @@
 import http from 'node:http'
 import type { AddressInfo } from 'node:net'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { createFetchJson, describeFailure, parseForceFail } from '../../src/main/http'
+import { createFetchJson, describeFailure, FORCE_FAIL_TAGS, forceFailFromEnv, parseForceFail } from '../../src/main/http'
 
 let server: http.Server
 let base: string
@@ -96,9 +96,33 @@ describe('parseForceFail', () => {
   it('maps the env values', () => {
     expect([...parseForceFail('vietcap')]).toEqual(['vietcap'])
     expect([...parseForceFail('cafef')]).toEqual(['cafef'])
-    expect([...parseForceFail('ALL')].sort()).toEqual(['cafef', 'vietcap'])
+    expect([...parseForceFail('ALL')].sort()).toEqual(['cafef', 'ssi', 'vietcap'])
     expect(parseForceFail(undefined).size).toBe(0)
     expect(parseForceFail('binance').size).toBe(0)
+  })
+
+  it('accepts comma lists and ignores unknown tags', () => {
+    expect([...parseForceFail('vietcap,cafef')]).toEqual(['vietcap', 'cafef'])
+    expect([...parseForceFail(' Vietcap , SSI ,nope')]).toEqual(['vietcap', 'ssi'])
+    expect([...parseForceFail('', FORCE_FAIL_TAGS.crypto)]).toEqual([])
+  })
+
+  it('uses the allowed tags of each market', () => {
+    expect([...parseForceFail('all', FORCE_FAIL_TAGS.crypto)]).toEqual(['binance', 'okx'])
+    expect([...parseForceFail('yahoo,vietcap', FORCE_FAIL_TAGS.us)]).toEqual(['yahoo'])
+    expect([...parseForceFail('binance', FORCE_FAIL_TAGS.us)]).toEqual([])
+  })
+})
+
+describe('forceFailFromEnv', () => {
+  it('is the union of the three market variables, each limited to its own tags', () => {
+    const tags = forceFailFromEnv({
+      TOPTICK_VN_FORCE_FAIL: 'vietcap,cafef',
+      TOPTICK_CRYPTO_FORCE_FAIL: 'binance,yahoo',
+      TOPTICK_US_FORCE_FAIL: 'all'
+    })
+    expect([...tags].sort()).toEqual(['binance', 'cafef', 'cnbc', 'vietcap', 'yahoo'])
+    expect(forceFailFromEnv({}).size).toBe(0)
   })
 })
 

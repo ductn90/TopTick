@@ -2,7 +2,8 @@ import { memo } from 'react'
 import { directionGlyph, formatPct, formatPrice, formatTime } from '../../shared/format'
 import { t, type MessageKey } from '../../shared/i18n'
 import { itemTone } from '../../shared/priceTone'
-import type { Instrument, InstrumentId, Language, Quote, QuoteSource, Series } from '../../shared/types'
+import { SOURCE_LABEL } from '../../shared/sources'
+import type { Instrument, InstrumentId, Language, Quote, Series } from '../../shared/types'
 import { PriceText } from './PriceText'
 import { Sparkline } from './Sparkline'
 import styles from './TickerItem.module.css'
@@ -12,14 +13,6 @@ export interface ItemModel {
   instrument: Instrument
   quote: Quote | undefined
   series: Series | undefined
-}
-
-const SOURCE_LABEL: Record<QuoteSource, string> = {
-  binance: 'Binance',
-  vietcap: 'Vietcap',
-  cafef: 'CafeF',
-  yahoo: 'Yahoo Finance',
-  fake: 'Fake data'
 }
 
 const STATE_NOTE: Partial<Record<Quote['state'], MessageKey>> = {
